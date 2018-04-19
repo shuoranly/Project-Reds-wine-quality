@@ -1,0 +1,572 @@
+#Red Wine Quality Exploration by Wei Chai
+========================================================
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, packages}
+# 加载你最终使用的所有组件
+# 在这个代码块的分析中。
+
+# 注意，在这个代码块中，将参数 "echo" 设为假。
+# This prevents the code from displaying in the knitted HTML output.这可以避免代码混入 HTML 输出显示。
+# 应当在文件中，对所有代码块设为 echo=FALSE 。
+library("ggplot2")
+library("tidyr")
+library("dplyr")
+library("GGally")
+library("RColorBrewer")
+library("psych")
+library("memisc")
+```
+
+```{r echo=FALSE, Load_the_Data}
+# 加载数据
+wineQualityReds <- read.csv("wineQualityReds.csv")
+wineQualityReds <- wineQualityReds[2:13]
+```
+
+```{r echo=FALSE, Observe_the_Data}
+# 观察数据
+str(wineQualityReds)
+summary(wineQualityReds)
+anyNA(wineQualityReds)
+```
+数据集总共包含12个变量，1599条观察值，数据中没有缺少什么数据。
+
+# 单变量绘图选择
+### quality
+```{r echo=FALSE, message=FALSE, warning=FALSE, Univariate_Plots: quality}
+#var_vector <- names(wineQualityReds)
+#length <- length(var_vector)
+#for(i in 1:length) {
+#    print(ggplot(data = wineQualityReds, aes(wineQualityReds[, i])) + geom_histogram())
+#}
+ggplot(data = wineQualityReds, aes(quality)) + 
+    geom_bar()
+
+table(wineQualityReds$quality)
+```
+
+从图中可以看出红酒的quality的最小值为3，最大值为8，而且大部分的值为5和6分,quality呈现正态分布。
+
+### fixed.acidity
+```{r echo=FALSE, message=FALSE, warning=FALSE, Univariate_Plots:fixed.acidity}
+ggplot(data = wineQualityReds, aes(fixed.acidity)) + 
+    geom_histogram(binwidth = 0.5) +
+    xlab(paste("fixed.acidity", "(", expression(g/dm^3), ")"))
+
+summary(wineQualityReds$fixed.acidity)
+```
+
+大部分红酒的fixed.acidity的值大约在7-9的范围内，最小值为4.6，最大值为15.9, fixed.acidity呈现偏态分布。
+
+### volatile.acidity
+```{r echo=FALSE, message=FALSE, warning=FALSE, Univariate_Plots: volatile.acidity}
+ggplot(data = wineQualityReds, aes(volatile.acidity)) + 
+    geom_histogram(binwidth = 0.05) +
+    xlab(paste("volatile.acidity", "(", expression(g/dm^3), ")"))
+
+summary(wineQualityReds$volatile.acidity)
+```
+
+可以看出大部分的红酒的volatile.acidity值都在0.4-0.6左右，而且很少有超过1.0，最小值为0.12，最大值为1.58，volatile.acidity呈现正态分布。
+
+### citric.acid
+```{r echo=FALSE, message=FALSE, warning=FALSE, Univariate_Plots: citric.acid}
+ggplot(data = wineQualityReds, aes(citric.acid)) + 
+    geom_histogram(binwidth = 0.05) +
+    xlab(paste("citric.acid", "(", expression(g/dm^3), ")"))
+
+summary(wineQualityReds$citric.acid)
+```
+
+大部分红酒的citric.acid值都很低，普遍低于0.5，而且最多的是值为0，citric.acid呈现偏态分布。
+
+### residual.sugar
+```{r echo=FALSE, message=FALSE, warning=FALSE, Univariate_Plots: residual.sugar}
+ggplot(data = wineQualityReds, aes(residual.sugar)) + 
+    geom_histogram(binwidth = 0.5) +
+    xlab(paste("residual.sugar", "(", expression(g/dm^3), ")"))
+
+summary(wineQualityReds$residual.sugar)
+```
+
+大部分红酒的residual.sugar值都很低，基本处于1-3范围内,但是有某些值很大，最大值为15.5，residual.sugar呈现长尾分布。
+
+
+### chlorides
+```{r echo=FALSE, message=FALSE, warning=FALSE, Univariate_Plots: chlorides}
+ggplot(data = wineQualityReds, aes(chlorides)) + 
+    geom_histogram(binwidth = 0.01) +
+    xlab(paste("chlorides", "(", expression(g/dm^3), ")"))
+
+summary(wineQualityReds$chlorides)
+```
+
+红酒的chlorides值主要集中在0.1附近，基本上都低于0.2，最小值为0.012，最大值为0.611，chlorides总体呈现长尾分布。
+
+
+### free.sulfur.dioxide
+```{r echo=FALSE, message=FALSE, warning=FALSE, Univariate_Plots: free.sulfur.dioxide}
+ggplot(data = wineQualityReds, aes(free.sulfur.dioxide)) + 
+    geom_histogram(binwidth = 1) +
+    xlab(paste("free.sulfur.dioxide", "(", expression(g/dm^3), ")"))
+
+summary(wineQualityReds$free.sulfur.dioxide)
+```
+
+大部分红酒的free.sulfur.dioxide的值都低于20，最小值为1，最大值为72，free.sulfur.dioxide呈现偏态分布。
+
+
+### total.sulfur.dioxide
+```{r echo=FALSE, message=FALSE, warning=FALSE, Univariate_Plots: total.sulfur.dioxide}
+ggplot(data = wineQualityReds, aes(total.sulfur.dioxide)) + 
+    geom_histogram(binwidth = 5) +
+    xlab(paste("total.sulfur.dioxide", "(", expression(g/dm^3), ")"))
+
+summary(wineQualityReds$total.sulfur.dioxide)
+```
+
+可以看出大部分红酒的total.sulfur.dioxide值都低于100，只有少数的值异常地高，最小值为6，最大值为289，呈现偏态分布。
+
+
+### density
+```{r echo=FALSE, message=FALSE, warning=FALSE, Univariate_Plots: density}
+ggplot(data = wineQualityReds, aes(density)) + 
+    geom_histogram(binwidth = 0.001) +
+    xlab(paste("density", "(", expression(g/cm^3), ")"))
+
+summary(wineQualityReds$density)
+```
+
+可以看出红酒的密度跟水差不多，大部分要稍微低于水，集中在0.995-1之间，density呈现正态分布。
+
+
+### pH
+```{r echo=FALSE, message=FALSE, warning=FALSE, Univariate_Plots: pH}
+ggplot(data = wineQualityReds, aes(pH)) + 
+    geom_histogram(binwidth = 0.05)
+
+summary(wineQualityReds$pH)
+```
+
+可以看出红酒呈酸性，pH值大部分在3.0-3.5之间，pH呈现正态分布。
+
+
+### sulphates
+```{r echo=FALSE, message=FALSE, warning=FALSE, Univariate_Plots: sulphates}
+ggplot(data = wineQualityReds, aes(sulphates)) + 
+    geom_histogram(binwidth = 0.05) +
+    xlab(paste("sulphates", "(", expression(g/dm^3), ")"))
+
+summary(wineQualityReds$sulphates)
+```
+
+可以看出大部分红酒的sulphates值在0.5-0.7之间，最小值为0.33，最大值为2，sulphates呈现偏态分布。
+
+
+### alcohol
+```{r echo=FALSE, message=FALSE, warning=FALSE, Univariate_Plots: alcohol}
+ggplot(data = wineQualityReds, aes(alcohol)) + 
+    geom_histogram(binwidth = 0.1) +
+    xlab(paste("alcohol", "(", "% by volume", ")"))
+
+summary(wineQualityReds$alcohol)
+```
+
+大部分红酒的alcohol值在9-11度左右,最小值为8.4，最大值为14.9，alcohol呈现偏态分布。
+
+
+### new variable total.acidity
+wineQualityReds <- wineQualityReds %>%
+    mutate(total.acidity = fixed.acidity + volatile.acidity)
+```{r echo=FALSE, message=FALSE, warning=FALSE, Univariate_Plots: total.acidity}
+wineQualityReds <- wineQualityReds %>%
+    mutate(total.acidity = fixed.acidity + volatile.acidity)
+
+ggplot(data = wineQualityReds, aes(total.acidity)) + 
+    geom_histogram(binwidth = 0.5) +
+    xlab(paste("total.acidity", "(", expression(g/dm^3), ")"))
+
+summary(wineQualityReds$total.acidity)
+```
+
+total.acidity的最小值为5.12，最大值为16.285，大部分数据都在7-11这个范围内，total.acidity呈现偏态分布。
+
+
+# 单变量分析
+
+### 你的数据集结构是什么？
+一共1599个红酒数据，其中有13个变量（fixed.acidity, volatile.acidity, citric.acid, residual.sugar, chlorides, free.sulfur.dioxide, total.sulfur.dioxide, density, pH, sulphates, alcohol, quality, total.acidity）,其中total.acidity为新创建的变量。<br>
+
+部分观察结果：<br>
+
+- 大部分红酒的quality为5分和6分。
+- 大部分红酒的fixed.acidity值在7-9的范围内。
+- 大部分的红酒的volatile.acidity值都在0.4-0.6左右。
+- 大部分红酒的citric.acid值都很低，普遍低于0.5，而且最多的是值为0。
+- 大部分红酒的residual.sugar值都很低，基本处于1-3范围内。
+- 红酒的chlorides值主要集中在0.1附近，基本上都低于0.2。
+- 大部分红酒的free.sulfur.dioxide的值都低于20。
+- 大部分红酒的total.sulfur.dioxide值都低于100。
+- 红酒的密度跟水差不多，大部分要稍微低于水。
+- 红酒呈酸性，pH值大部分在3.0-3.5之间。
+- 大部分红酒的alcohol值在9-11度左右。
+
+### 你的数据集内感兴趣的主要特性有哪些？
+我感兴趣的特性是alcohol，residual.sugar和quality，我怀疑可以通过使用alcohol和residual.sugar以及一些其他特性的组合来预测quality。
+
+### 你认为数据集内哪些其他特征可以帮助你探索兴趣特点？
+我认为volatile.acidity，citric.acid，total.sulfur.dioxide都有可能会对quality造成影响。
+
+### 根据数据集内已有变量，你是否创建了任何新变量？
+创建了一个新变量total.acidity，因为已有fixed.acidity和volatile.acidity，所以就顺势地创建了总体的acidity变量。
+
+### 在已经探究的特性中，是否存在任何异常分布？你是否对数据进行一些操作，如清洁、调整或改变数据的形式？如果是，你为什么会这样做？
+从上面各个图形中可以看出，residual.sugar,chlorides以及total.sulfur.dioxide中都存在一些很大的值。<br>
+在读取数据的时候将索引列X给去除了，因为这并不是我们所需要的数据。当然之后也没有对数据进行调整，是因为没有发现一些比较明显的错误，在后续的分析中，会根据实际情况来看是否要去调整火改变数据的形式。
+
+
+
+# 双变量绘图选择
+```{r echo=FALSE, Bivariate_Plots: cor}
+#首先来看一下各个特性之间的相关系数
+cor(wineQualityReds, method = "pearson")
+```
+
+从上述计算得到的相关系数上来看，并没有哪个特性与quality呈现强相关，比较相关的特性依次有alcohol，volatile.acidity，sulphates，citric.acid。
+
+
+```{r echo=FALSE, fig.width=14, fig.height=13, Bivariate_Plots: pairs.panels}
+pairs.panels(wineQualityReds, pch = 20)
+```
+
+从上面的图中，可以更加清楚地看出各个特性之间的散点图分布，以及相关系数。除了之前提及到的与quality有关的特性之外，还可以看出density与alcohol有着弱相关性，fixed.acidity、volatile.acidity和citric.acid之间有比较强的相关性，chlorides、citric.acid和sulphates有着弱相关，当然还有一些其他的特性之间有着某种相关性，比如density和fixed.acidity，但是在这里我只关心有可能影响quality的，下面将详细地去探索这些特性之间的关系。
+
+
+## quality & alcohol
+```{r echo=FALSE, message=FALSE, warning=FALSE, Bivariate_Plots: quality-alcohol}
+#首先来看与quality相关性最大的alcohol参数
+ggplot(data = wineQualityReds, aes(x = factor(quality),y = alcohol)) +
+    geom_boxplot() +
+    geom_point(stat = "summary", fun.y = median, shape = 4, color = "red") +
+    ylab(paste("alcohol", "(", "% by volume", ")"))
+
+by(wineQualityReds$alcohol, wineQualityReds$quality, summary)
+```
+
+从上述结果来看，由于quality值为3，4还有8的数量很少，因此总体上alcohol的值越大，quality值越大，两者呈正相关。
+
+
+## quality & volatile.acidity
+```{r echo=FALSE, message=FALSE, warning=FALSE, Bivariate_Plots: quality-volatile.acidity}
+#然后看volatile.acidity参数
+ggplot(data = wineQualityReds, aes(x = factor(quality), y = volatile.acidity)) +
+    geom_boxplot() +
+    geom_point(stat = "summary", fun.y = median, shape = 4, color = "red") +
+    ylab(paste("volatile.acidity", "(", expression(g/dm^3), ")"))
+
+by(wineQualityReds$volatile.acidity, wineQualityReds$quality, summary)
+```
+
+可以看出总体上volatile.acidity的值越小，quality值越大，两者呈弱负相关。
+
+
+## quality & sulphates
+```{r echo=FALSE, message=FALSE, warning=FALSE, Bivariate_Plots: quality-sulphates}
+#接下来看sulphates参数
+ggplot(data = wineQualityReds, aes(x = factor(quality), y = sulphates)) +
+    geom_boxplot() +
+    geom_point(stat = "summary", fun.y = median, shape = 4, color = "red") +
+    ylab(paste("sulphates", "(", expression(g/dm^3), ")"))
+
+by(wineQualityReds$sulphates, wineQualityReds$quality, summary)
+```
+
+可以看出sulphates的值越大，quality的值越大，两者呈弱正相关。
+
+
+## quality & citric.acid
+```{r echo=FALSE, message=FALSE, warning=FALSE, Bivariate_Plots: quality-citric.acid}
+#citric.acid参数
+ggplot(data = wineQualityReds, aes(x = factor(quality), y = citric.acid)) +
+    geom_boxplot() + 
+    geom_point(stat = "summary", fun.y = median, shape = 4, color = "red") +
+    ylab(paste("citric.acid", "(", expression(g/dm^3), ")"))
+
+by(wineQualityReds$citric.acid, wineQualityReds$quality, summary)
+```
+
+可以看出citric.acid的值越大，quality的值越大，两者呈弱正相关。
+
+
+## density & alcohol
+```{r echo=FALSE, message=FALSE, warning=FALSE, Bivariate_Plots: alcohol-density}
+ggplot(data = wineQualityReds, aes(x = density, y = alcohol)) +
+    geom_point(alpha = 0.2) +
+    geom_smooth(method = "lm") +
+    xlim(0.992, 0.997) +
+    xlab(paste("density", "(", expression(g/cm^3), ")")) +
+    ylab(paste("alcohol", "(", "% by volume", ")"))
+```
+
+可以看出随着density的增大，alcohol减小，两者呈负相关。
+
+
+## fixed.acidity & citric.acid
+```{r, echo=FALSE, message=FALSE, warning=FALSE, Bivariate_Plots: fixed.acidity-citric.acid}
+#fixed.acidity和citric.acid
+ggplot(data = wineQualityReds, aes(x = fixed.acidity, y = citric.acid)) + 
+    geom_jitter(alpha = 0.3) +
+    geom_smooth() +
+    xlim(6, 12) +
+    xlab(paste("fixed.acidity", "(", expression(g/dm^3), ")")) +
+    ylab(paste("citric.acid", "(", expression(g/dm^3), ")"))
+```
+
+可以看出随着fixed.acidity的值增大，citric.acid的值也在增大，两者呈正相关。
+
+
+## volatile.acidity & citric.acid
+```{r, echo=FALSE, message=FALSE, warning=FALSE, Bivariate_Plots: volatile.acidity-citric.acid}
+#volatile.acidity和citric.acid
+ggplot(data = wineQualityReds, aes(x = volatile.acidity, y = citric.acid)) + 
+    geom_jitter(alpha = 0.2) +
+    geom_smooth() +
+    xlim(0.2, 1.0) +
+    xlab(paste("volatile.acidity", "(", expression(g/dm^3), ")")) +
+    ylab(paste("citric.acid", "(", expression(g/dm^3), ")"))
+```
+
+可以看出随着volatile.acidity的增大，citric.acid在减小，两者呈负相关。
+
+
+## chlorides & sulphates
+```{r, echo=FALSE, message=FALSE, warning=FALSE, Bivariate_Plots: chlorides-sulphates}
+#chlorides和sulphates
+ggplot(data = wineQualityReds, aes(x =chlorides, y = sulphates)) +
+    geom_jitter(alpha = 0.2) +
+    geom_smooth() +
+    xlim(0.05, 0.5) +
+    ylim(0.5, 1.5) +
+    xlab(paste("chlorides", "(", expression(g/dm^3), ")")) +
+    ylab(paste("sulphates", "(", expression(g/dm^3), ")"))
+```
+
+总体上来看chlorides的值越大，sulphates的值越大，两者呈正相关，但是图中来看聚集在一起的点很多，需要引起注意。
+
+
+## citric.acid & sulphates
+```{r, echo=FALSE, message=FALSE, warning=FALSE, Bivariate_Plots: citric.acid-sulphates}
+#citric.acid和sulphates
+ggplot(data = wineQualityReds, aes(x = citric.acid, y = sulphates)) +
+    geom_jitter() +
+    geom_smooth(alpha =1/10) +
+    xlim(0, 0.75) +
+    xlab(paste("citric.acid", "(", expression(g/dm^3), ")")) +
+    ylab(paste("sulphates", "(", expression(g/dm^3), ")"))
+```
+
+可以看出随着citric.acid的增大，sulphates的值也变大，两者呈正相关。
+
+
+# 双变量分析
+
+### 探讨你在这部分探究中观察到的一些关系。这些感兴趣的特性与数据集内其他特性有什么区别？
+在这部分我发现红酒的质量quality与alcohol，sulphates和citric.acid呈正相关性，与volatile.acidity呈负相关性，其中quality与alcohol的相关性最强。这些特性相比其他特性更加能够影响红酒的质量，也就是说对味道，口感之类的影响较大。当然这些特性与其他特性之间也是有着一些关系的，从上面的研究中可以发现density与alcohol呈负相关，volatile.acidity与citric.acid呈负相关，fixed.acidity，sulphates与citric.acid呈正相关，chlorides与sulphates呈正相关。
+
+### 你是否观察到主要特性与其他特性之间的有趣关系？
+在未进行双变量分析之前，我认为alcohol，residual.sugar会对quality造成比较大的影响，但是从相关系数上来看，residual.sugar并未对quality造成比较大的影响，有点出乎意料。
+
+### 你发现最强的关系是什么？
+我发现的最强的关系是我新创建的变量total.acidity与fixed.acidity，相关系数为0.9948。当然这也很容易去解释，这是因为total.acidity是fixed.acidity与volatile.acidity两者之和，而且fixed.acidity的值远大于volatile.acidity。
+
+
+
+# 多变量绘图选择
+从上面的探讨中我们可以知道影响quality的特性有alcohol，volatile.acidity，sulphates，citric.acid，下面继续深入地的探讨这几者之间的关系。
+
+## quality & alcohol & volatile.acidity
+```{r echo=FALSE, message=FALSE, warning=FALSE, Multivariate_Plots: quality-alcohol-volatile.acidity}
+ggplot(data = wineQualityReds, aes(x = alcohol, y = volatile.acidity, color = factor(quality))) +
+    geom_jitter() +
+    geom_smooth(method = 'lm', se = FALSE) +
+    xlim(9, 14) +
+    ylim(0.2, 1.0) +
+    scale_color_brewer(type="seq") +
+    xlab(paste("alcohol", "(", "% by volume", ")")) +
+    ylab(paste("volatile.acidity", "(", expression(g/dm^3), ")"))
+```
+
+从图中可以看出随着alcohol的值增大，fator值大的点数也在变多；然而volatile.acidity值大的区域内，factor值小的点数比较多，这也正与前面观察到的现象一致，quality与alcohol呈正相关性，与volatile.acidity呈负相关性。alcohol与volatile.acidity之间的关系，从图中来看既有上升的也有下降的直线，但考虑到factor值为5和6的数目比较多，因此两者应该也是呈比较弱的负相关。
+
+
+## quality & alcohol & sulphates
+```{r echo=FALSE, message=FALSE, warning=FALSE, Multivariate_Plots: quality-alcohol-sulphates}
+ggplot(data = wineQualityReds, aes(x = alcohol, y = sulphates, color = factor(quality))) +
+    geom_jitter() +
+    geom_smooth(method = 'lm', se = FALSE) +
+    xlim(9, 14) +
+    ylim(0.4, 1.0) +
+    scale_color_brewer(type="seq") +
+    xlab(paste("alcohol", "(", "% by volume", ")")) +
+    ylab(paste("sulphates", "(", expression(g/dm^3), ")"))
+```
+
+同上，从图中可以看出随着alcohol的值增大，fator值大的点数也在变多；随着sulphates值的变大，quality值大的拟合线普遍高于值小的拟合线。即alcohol，sulphates都和fator呈正相关。同时我们还可以看出这些拟合线都是呈上升趋势，也就是alcohol和sulphates两者之间也呈现出弱正相关。
+
+
+## quality & alcohol & citric.acid
+```{r echo=FALSE, message=FALSE, warning=FALSE, Multivariate_Plots: quality-alcohol-citric.acid}
+ggplot(data = wineQualityReds, aes(x = alcohol, y = citric.acid, color = factor(quality))) +
+    geom_jitter() +
+    geom_smooth(method = 'lm', se = FALSE) +
+    scale_color_brewer(type="seq") +
+    xlab(paste("alcohol", "(", "% by volume", ")")) +
+    ylab(paste("citric.acid", "(", expression(g/dm^3), ")"))
+```
+
+同上，从图中可以看出随着alcohol的值增大，fator值大的点数也在变多；随着citric.acid值的变大，quality值大的拟合线也基本高于值小的拟合线。也就是说，alcohol、citric.acid和fator呈正相关。alcohol和citric.acid之间的相关性从图中来看并不是很明显。
+
+
+## quality & volatile.acidity & sulphates
+```{r echo=FALSE, message=FALSE, warning=FALSE, Multivariate_Plots: quality-volatile.acidity-sulphates}
+ggplot(data = wineQualityReds, aes(x = volatile.acidity, y = sulphates, color = factor(quality))) +
+    geom_jitter() +
+    geom_smooth(method = 'lm', se = FALSE) +
+    xlim(0.2, 1.0) +
+    ylim(0.4, 1.0) +
+    scale_color_brewer(type="seq") +
+    xlab(paste("volatile.acidity", "(", expression(g/dm^3), ")")) +
+    ylab(paste("sulphates", "(", expression(g/dm^3), ")"))
+```
+
+在之前的分析中我们已经知道volatile.acidity与quality呈负相关，sulphates与quality呈正相关。从图中可以看出，随着volatile.acidity值的增大，sulphates的值在减小，也就是说两者呈负相关。
+
+
+## quality & volatile.acidity & citric.acid
+```{r echo=FALSE, message=FALSE, warning=FALSE, Multivariate_Plots: quality-volatile.acidity-citric.acid}
+ggplot(data = wineQualityReds, aes(x = volatile.acidity, y = citric.acid, color = factor(quality))) +
+    geom_jitter() +
+    geom_smooth(method = 'lm', se = FALSE) +
+    xlim(0.2, 1.0) +
+    ylim(0, 0.75) +
+    scale_color_brewer(type="seq") +
+    xlab(paste("volatile.acidity", "(", expression(g/dm^3), ")")) +
+    ylab(paste("citric.acid", "(", expression(g/dm^3), ")"))
+```
+
+同理,volatile.acidity、citric.acid和quality的关系之间分析过，在此不分析。从图中来看，随着volatile.acidity值增大，citric.acid值在减小，两者呈负相关，而且从斜率上来看，中等强度负相关。
+
+
+## quality & sulphates & citric.acid
+```{r echo=FALSE, message=FALSE, warning=FALSE, Multivariate_Plots: quality-sulphates-citric.acid}
+ggplot(data = wineQualityReds, aes(x = sulphates, y = citric.acid, color = factor(quality))) +
+    geom_jitter() +
+    geom_smooth(method = 'lm', se = FALSE) +
+    xlim(0.4, 1.0) +
+    ylim(0, 0.75) +
+    scale_color_brewer(type="seq") +
+    xlab(paste("sulphates", "(", expression(g/dm^3), ")"))+
+    ylab(paste("citric.acid", "(", expression(g/dm^3), ")"))
+```
+
+还是同理，sulphates、citric.acid和quality的关系之间分析过，在此不分析。从图中来看除了factor值为8的拟合线外，其他的都是随着sulphates的值增大，citric.acid的值也在增大，两者呈正相关。
+
+
+## 尝试建立与quality有关的模型
+```{r echo=FALSE, message=FALSE, warning=FALSE, Model}
+m1 = lm(quality ~ alcohol, data = wineQualityReds)
+m2 = update(m1, ~ . + volatile.acidity)
+m3 = update(m2, ~ . + sulphates)
+m4 = update(m3, ~ . + citric.acid)
+mtable(m1, m2, m3, m4)
+```
+
+从结果上来看得到的模型为：quality = 2.646 + 0.309*alcohol - 1.265*volatile.acidity + 0.696*sulphates - 0.079* citric.acid。但是，可以看出
+R-squared的值很小，模型不理想。
+
+## 预测
+```{r echo=FALSE, message=FALSE, warning=FALSE, Predict}
+thisRedWine = data.frame(alcohol = 10.0, volatile.acidity = 0.65,
+                         sulphates = 0.47, citric.acid = 0)
+modelEstimate = predict(m4, newdata = thisRedWine,
+                        interval="prediction", level = .95)
+modelEstimate
+```
+
+此处可以看出预测的上下界分别为3.947646和6.534962，真实的quality值为7，预测结果不理想，也说明模型存在问题。
+
+
+# 多变量分析
+
+###  探讨你在这部分探究中观察到的一些关系。通过观察感兴趣的特性，是否存在相互促进的特性？
+通过观察，可以看出的确存在相互促进的特性，如quality与alcohol，sulphates和citric.acid之间相互促进，在此次多变量分析中，我们还可以得知：<br>
+- alcohol与volatile.acidity呈负相关
+- alcohol和sulphates呈弱正相关
+- volatile.acidity与sulphates呈负相关
+- volatile.acidity与citric.acid呈负相关
+- sulphates与citric.acid呈正相关
+
+### 这些特性之间是否存在有趣或惊人的联系呢？
+与quality呈正相关的特性，两两之间也呈正相关，其他特性与volatile.acidity之间都呈负相关。
+
+### 选项：你是否创建过数据集的任何模型？讨论你模型的优缺点。
+尝试着创建了线性模型，但是模型不理想，拟合的不够好，而且在此是针对着1599个数据进行拟合，可能存在过拟合。
+
+------
+
+# 定稿图与总结
+
+### 绘图一
+```{r echo=FALSE, echo=FALSE, message=FALSE, warning=FALSE, Plot_One}
+ggplot(data = wineQualityReds, aes(x = quality)) + 
+  geom_bar(color = I('black'), fill = I('#F79420')) +
+  xlab("Wine Quality") +
+  ylab("Numbers of wines") + 
+  scale_x_continuous(breaks = seq(1,10,1)) +
+  scale_y_continuous(breaks = seq(1,800,50))+
+  labs(title = "Distribution of Red Wine Quality")
+```
+
+### 描述一
+从图中可以看出，红酒quality值主要的还是等于5和6的占多数,并且quality呈现出正态分布. 而且高品质和很低品质的酒数量都很少。
+
+### 绘图二
+```{r echo=FALSE, echo=FALSE, message=FALSE, warning=FALSE, Plot_Two}
+ggplot(data = wineQualityReds, aes(x = factor(quality), y = alcohol)) +
+  geom_boxplot(alpha = 0.5, color='red') +
+  geom_point(stat = "summary", fun.y = median, shape = 4) +
+  coord_cartesian(ylim = c(8, 15)) +
+  xlab("Wine Quality") +
+  ylab(paste("Alcohol", "(", "% by volume", ")")) +
+  ggtitle('Boxplot of Alcohol and Quality')
+```
+
+### 描述二
+在这里选择了与quality相关性最大的alcohol特性，由于quality值为3，4还有8的数量很少，因此总体上alcohol的值越大，quality值越大，两者呈正相关。而且我们还可以看出alcohol的值集中在9-11度左右。
+
+
+### 绘图三
+```{r echo=FALSE, echo=FALSE, message=FALSE, warning=FALSE, Plot_Three}
+ggplot(data = wineQualityReds, aes(x = alcohol, y = volatile.acidity, color = factor(quality))) +
+    geom_jitter() +
+    geom_smooth(method = 'lm', se = FALSE) +
+    xlim(9, 14) +
+    ylim(0.2, 1.0) +
+    scale_color_brewer(type="seq") +
+    xlab(paste("Alcohol", "(", "% by volume", ")")) +
+    ylab(paste("Volatile.Acidity", "(", expression(g/dm^3), ")")) +
+    ggtitle("Distribution of Volatile.Acidity & Alcohol & Quality")
+```
+
+### 描述三
+图中可以很清晰的反映出alcohol, volatile.acidity, quality三者之间的关系，从图中可以看出随着alcohol的值增大，fator值大的点数也在变多；然而
+volatile.acidity值大的区域内，factor值小的点数比较多。quality与alcohol呈正相关性，与volatile.acidity呈负相关性。换句话就是说alcohol值越大， volatile.acidity值越小，红酒的品质越好。
+
+------
+
+# 反思
+首先我在项目初级犹豫了很久，因为不知道从哪里去入手，一心只想去找一些关系，想能够找到一些比较明显的模型，但是却发现没有上面明显的模型，这让我一下子陷入到无助当中。从单变量分析到双变量分析再到多变量分析的过程中，有时候会因为一些检验，反而影响了判断。比如一开始我认为residual.sugar对红酒的品质有很大影响，结果分析下来发现影响的确很小。所以，在此我觉得有一定的背景知识果然重要，但是面对数据还是要客观地去分析。如果数据没问题，那么分析出来的结果和有可能就是真实的，当然也有可能是一些我们没有注意到的其他因素导致的。总之，对待数据要有严谨的态度。最后在建模阶段，我并没有创建出合适的模型，这也是我感到比较遗憾的，这块的确是我能力还没达到，还要继续去学习机器学习方面的知识。<br>
+在接下来的工作中可能还需要注意以下几点：<br>
+1.这个数据集还是比较小，可以看出质量为5和6的占大多数，数据有点集中，不利于去分析，应该扩大数据集。<br>
+2.在建立模型方面上，应该考虑多尝试几种模型，当然我个人希望在以后能搭建一个神经网络去解决这个问题。
+
